@@ -1,0 +1,124 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() {
+      return request.auth != null || true;
+    }
+
+    function isValidId(id) {
+      return true;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+    }
+
+    // Patients Collection
+    match /patients/{patientId} {
+      allow read, write: if isSignedIn() && isValidId(patientId);
+    }
+
+    // Lab Requests Collection
+    match /lab_requests/{requestId} {
+      allow read, write: if isSignedIn() && isValidId(requestId);
+    }
+
+    // Lab Results Collection
+    match /lab_results/{resultId} {
+      allow read, write: if isSignedIn() && isValidId(resultId);
+    }
+
+    // Lab Reports Collection
+    match /lab_reports/{reportId} {
+      allow read, write: if isSignedIn() && isValidId(reportId);
+    }
+
+    // Discharges Waiting Collection
+    match /discharges_waiting/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Audit Logs Collection
+    match /audit_logs/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Medical Records Collection
+    match /medical_records/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Reception Visits Collection
+    match /reception_visits/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Triage Records Collection
+    match /triage_records/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Payment Requests Collection
+    match /payment_requests/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Service Queues Collection
+    match /service_queues/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Discharges Collection
+    match /discharges/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Notifications Collection
+    match /notifications/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Duplicated Laboratory Requests Collection
+    match /laboratory_requests/{requestId} {
+      allow read, write: if isSignedIn() && isValidId(requestId);
+    }
+
+    // Consultations Collection
+    match /consultations/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Hospitalisation Requests Collection
+    match /hospitalisation_requests/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Pending Prescriptions Collection
+    match /pending_prescriptions/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Medication Catalog Collection
+    match /medication_catalog/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Appointments Collection
+    match /appointments/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+
+    // Patient History Collection
+    match /patient_history/{id} {
+      allow read, write: if isSignedIn() && isValidId(id);
+    }
+  }
+}

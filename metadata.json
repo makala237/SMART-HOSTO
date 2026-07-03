@@ -1,0 +1,11 @@
+{
+  "name": "SmartHosto - SIH Intelligent",
+  "description": "Système d'Information Hospitalier complet avec DME centralisé, gestion de stock, facturation automatisée et aide au diagnostic IA.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,415 @@
+{
+  "entities": {
+    "LabRequest": {
+      "title": "Lab Request",
+      "description": "A laboratory test request for a patient.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique ID of the request." },
+        "patientId": { "type": "string", "description": "ID of the patient." },
+        "patientName": { "type": "string", "description": "Name of the patient." },
+        "patientAge": { "type": "number", "description": "Age of the patient." },
+        "patientGender": { "type": "string", "description": "Gender of the patient." },
+        "prescriberId": { "type": "string", "description": "ID of the prescribing practitioner." },
+        "prescriberName": { "type": "string", "description": "Name of the prescribing practitioner." },
+        "department": { "type": "string", "description": "Requesting department/service." },
+        "date": { "type": "string", "description": "Request date in ISO format." },
+        "status": {
+          "type": "string",
+          "enum": ["en attente", "patient appelé", "prélèvement fait", "en cours", "terminé", "validé", "annulé"],
+          "description": "Status of the lab request."
+        },
+        "priority": { "type": "string", "enum": ["normal", "urgent", "critique"], "description": "Priority level." },
+        "clinicalContext": { "type": "object", "description": "Clinical context maps: motif, diagnostic, and note." },
+        "exams": { "type": "array", "description": "List of exams requested." },
+        "totalAmount": { "type": "number", "description": "Total price amount." },
+        "billingStatus": { "type": "string", "enum": ["pending", "partial", "paid", "exonéré"], "description": "Billing status." },
+        "comments": { "type": "string", "description": "Practitioner comments." }
+      },
+      "required": ["id", "patientId", "patientName", "prescriberId", "prescriberName", "date", "status", "priority", "totalAmount", "billingStatus"]
+    },
+    "LabResult": {
+      "title": "Lab Result",
+      "description": "The laboratory test result details.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique ID of the test result." },
+        "demandeId": { "type": "string", "description": "Associated lab request ID." },
+        "patientId": { "type": "string", "description": "ID of the patient." },
+        "lignes": { "type": "array", "description": "Visual or quantitative result line items." },
+        "commentaireGlobal": { "type": "string", "description": "Global laboratory comment." },
+        "statut": { "type": "string", "enum": ["brouillon", "prêt pour validation", "validé", "rejeté"], "description": "Statut of result." },
+        "saisiPar": { "type": "string", "description": "User ID of laboratory technician who keyed in data." },
+        "dateSaisie": { "type": "string", "description": "Entry date ISO format." },
+        "validePar": { "type": "string", "description": "User ID of validating doctor." },
+        "dateValidation": { "type": "string", "description": "Validation date ISO format." },
+        "remarquesValidation": { "type": "string", "description": "Validation notes or feedback." }
+      },
+      "required": ["id", "demandeId", "patientId", "lignes", "statut", "saisiPar", "dateSaisie"]
+    },
+    "LabReport": {
+      "title": "Lab Report",
+      "description": "A generated laboratory report document reference.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique ID of the report document." },
+        "resultatId": { "type": "string", "description": "Associated result details ID." },
+        "patientId": { "type": "string", "description": "ID of the patient." },
+        "dateGeneration": { "type": "string", "description": "Generation date ISO format." },
+        "url": { "type": "string", "description": "Cloud Storage url or base64 data of PDF." }
+      },
+      "required": ["id", "resultatId", "patientId", "dateGeneration"]
+    },
+    "User": {
+      "title": "User Profile",
+      "description": "User profile with role management.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] }
+      },
+      "required": ["role"]
+    },
+    "Patient": {
+      "title": "Patient Record",
+      "description": "Main descriptive electronic health profile representing a patient.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "birthDate": { "type": "string" },
+        "gender": { "type": "string" },
+        "phone": { "type": "string" },
+        "residence": { "type": "string" },
+        "emergencyContact": { "type": "string" },
+        "emergencyPhone": { "type": "string" },
+        "maritalStatus": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "firstName", "lastName", "birthDate", "gender"]
+    },
+    "DischargeWaiting": {
+      "title": "Discharge Waiting",
+      "description": "Metadata trace of patient waiting clearance for physical departure.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "admissionDate": { "type": "string" },
+        "department": { "type": "string" },
+        "status": { "type": "string" },
+        "medicalClearance": { "type": "boolean" },
+        "hospitalizationClosed": { "type": "boolean" },
+        "financialClearance": { "type": "boolean" }
+      },
+      "required": ["id", "name"]
+    },
+    "AuditLog": {
+      "title": "Audit Trace",
+      "description": "Continuous tracking trace logs.",
+      "type": "object",
+      "properties": {
+        "user": { "type": "string" },
+        "role": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "object" },
+        "module": { "type": "string" }
+      },
+      "required": ["user", "action", "timestamp"]
+    },
+    "MedicalRecord": {
+      "title": "Dossier DME",
+      "description": "Full chronological background, historical milestones and vitals of a patient.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "vitals": { "type": "object" },
+        "history": { "type": "array" }
+      },
+      "required": ["id", "patientId"]
+    },
+    "ReceptionVisit": {
+      "title": "Reception Visit",
+      "description": "Tracks front-desk registration timeline.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "patientName": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "motif": { "type": "string" },
+        "orientation": { "type": "string" },
+        "user": { "type": "string" }
+      },
+      "required": ["id", "patientId", "patientName", "date", "time"]
+    },
+    "TriageRecord": {
+      "title": "Triage Record",
+      "description": "Biomarkers and clinical priority sorting records.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "visitId": { "type": "string" },
+        "vitals": { "type": "object" },
+        "priority": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "patientId", "vitals"]
+    },
+    "PaymentRequest": {
+      "title": "Payment Request",
+      "description": "Invoice order requested towards cashier.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "patientName": { "type": "string" },
+        "requestingService": { "type": "string" },
+        "sourceModule": { "type": "string" },
+        "type": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "patientId", "patientName", "totalAmount", "status"]
+    },
+    "ServiceQueue": {
+      "title": "Service Queue",
+      "description": "Active router for queuing list in rooms/clinics.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "dmeId": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "age": { "type": "number" },
+        "gender": { "type": "string" },
+        "time": { "type": "string" },
+        "date": { "type": "string" },
+        "motif": { "type": "string" },
+        "service": { "type": "string" },
+        "status": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "vitals": { "type": "object" }
+      },
+      "required": ["id", "patientId", "service", "status"]
+    },
+    "Discharge": {
+      "title": "Physical Discharge",
+      "description": "A signed checkout document for exit clearances.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "patientName": { "type": "string" },
+        "department": { "type": "string" },
+        "admissionDate": { "type": "string" },
+        "dischargeDate": { "type": "string" },
+        "dischargeTime": { "type": "string" },
+        "user": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "patientId", "patientName", "dischargeDate"]
+    },
+    "Notification": {
+      "title": "System Notification",
+      "description": "Broadcast trace for reactive updates across modules.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "message": { "type": "string" },
+        "module": { "type": "string" },
+        "targetModules": { "type": "array" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "message"]
+    },
+    "Consultation": {
+      "title": "Consultation",
+      "description": "A clinical consultation record with observation, diagnosis, and treatment.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "patient": { "type": "string" },
+        "patientIdRaw": { "type": "string" },
+        "age": { "type": "number" },
+        "gender": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "doctor": { "type": "string" },
+        "doctorEmail": { "type": "string" },
+        "motif": { "type": "string" },
+        "diagnosis": { "type": "string" },
+        "treatment": { "type": "string" },
+        "exams": { "type": "string" },
+        "observation": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "patientId", "patient", "createdAt"]
+    },
+    "HospitalisationRequest": {
+      "title": "Hospitalisation Request",
+      "description": "A request for patient hospitalization.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "patientName": { "type": "string" },
+        "age": { "type": "number" },
+        "gender": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "service": { "type": "string" },
+        "priority": { "type": "string" },
+        "dureePrevisionnelle": { "type": "string" },
+        "motif": { "type": "string" },
+        "observations": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "patientId", "patientName", "service", "status", "createdAt"]
+    },
+    "PendingPrescription": {
+      "title": "Pending Prescription",
+      "description": "A prescription pending pharmacy dispensation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "patient": { "type": "string" },
+        "doctor": { "type": "string" },
+        "date": { "type": "string" },
+        "items": { "type": "array" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "patientId", "items", "status", "createdAt"]
+    },
+    "MedicationCatalog": {
+      "title": "Medication Catalog Item",
+      "description": "An item in the healthcare clinic medication inventory.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "dosage": { "type": "string" },
+        "price": { "type": "number" },
+        "stock": { "type": "number" },
+        "forms": { "type": "array" }
+      },
+      "required": ["id", "name", "price", "stock"]
+    },
+    "Appointment": {
+      "title": "Patient Consultation Appointment",
+      "description": "An appointment scheduled for future patient follow-up or orientation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "patient": { "type": "string" },
+        "age": { "type": "number" },
+        "gender": { "type": "string" },
+        "reason": { "type": "string" },
+        "status": { "type": "string" },
+        "doctor": { "type": "string" }
+      },
+      "required": ["id", "date", "time", "patient", "status"]
+    }
+  },
+  "firestore": {
+    "/lab_requests/{requestId}": {
+      "schema": "LabRequest",
+      "description": "Collection of laboratory requests."
+    },
+    "/lab_results/{resultId}": {
+      "schema": "LabResult",
+      "description": "Collection of laboratory test results inputs."
+    },
+    "/lab_reports/{reportId}": {
+      "schema": "LabReport",
+      "description": "Collection of generated laboratory PDF reports."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User settings, roles, and profiles."
+    },
+    "/patients/{patientId}": {
+      "schema": "Patient",
+      "description": "Global patient identity and status index."
+    },
+    "/discharges_waiting/{id}": {
+      "schema": "DischargeWaiting",
+      "description": "Roster of patients awaiting final discharge release."
+    },
+    "/audit_logs/{id}": {
+      "schema": "AuditLog",
+      "description": "Immutable security tracking telemetry."
+    },
+    "/medical_records/{id}": {
+      "schema": "MedicalRecord",
+      "description": "Secure master medical history records."
+    },
+    "/reception_visits/{id}": {
+      "schema": "ReceptionVisit",
+      "description": "Tracks reception counter admissions."
+    },
+    "/triage_records/{id}": {
+      "schema": "TriageRecord",
+      "description": "Triage priority levels and vitals profiles."
+    },
+    "/payment_requests/{id}": {
+      "schema": "PaymentRequest",
+      "description": "Pending and paid invoicing requests."
+    },
+    "/service_queues/{id}": {
+      "schema": "ServiceQueue",
+      "description": "Interactive queues routing patients between services."
+    },
+    "/discharges/{id}": {
+      "schema": "Discharge",
+      "description": "Archived administrative checkouts."
+    },
+    "/notifications/{id}": {
+      "schema": "Notification",
+      "description": "Cross-module event system alerts."
+    },
+    "/laboratory_requests/{requestId}": {
+      "schema": "LabRequest",
+      "description": "Collection of duplicate laboratory requests in old system adapters."
+    },
+    "/consultations/{id}": {
+      "schema": "Consultation",
+      "description": "Collection of clinical consultation observations and clinical files."
+    },
+    "/hospitalisation_requests/{id}": {
+      "schema": "HospitalisationRequest",
+      "description": "Collection of active pre-admission/hospitalization requests."
+    },
+    "/pending_prescriptions/{id}": {
+      "schema": "PendingPrescription",
+      "description": "Collection of active pending prescriptions forwarded to the pharmacy."
+    },
+    "/medication_catalog/{id}": {
+      "schema": "MedicationCatalog",
+      "description": "Healthcare medication inventory data."
+    },
+    "/appointments/{id}": {
+      "schema": "Appointment",
+      "description": "Scheduled appointments of all patients."
+    }
+  }
+}
